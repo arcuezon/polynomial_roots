@@ -22,13 +22,6 @@ void poly::setCoef()
     std::cin >> deg;
   }
 
-  coef = new std::complex<double>[deg + 1];
-
-  for (int n = 0; n <= deg; n++)
-  {
-    coef[n] = 0;
-  }
-
   double coefIn = 0;
 
   for (int n = 0; n <= deg; n++)
@@ -36,7 +29,7 @@ void poly::setCoef()
     std::cout << "Coefficient for degree " << n << ": ";
     std::cin >> coefIn;
 
-    coef[n] = coefIn;
+    coef.push_back(coefIn);
   }
 }
 
@@ -64,22 +57,22 @@ std::complex<double> poly::evalPoly(std::complex<double> x)
   return sum;
 }
 
-void poly::fileSetCoef(int inDeg, std::complex<double> inCoef[])
+void poly::fileSetCoef(int inDeg, std::vector<std::complex<double>> inCoef)
 {
   deg = inDeg;
 
-  this->coef = new std::complex<double>[deg + 1];
-
   for (int i = 0; i <= deg; i++)
   {
-    coef[i] = inCoef[i];
+    coef.push_back(inCoef[i]);
   }
 }
 
 poly poly::diff()
 {
   poly eqnPrime;
-  std::complex<double> *coefPrime = new std::complex<double>[deg];
+  std::vector<std::complex<double>> coefPrime;
+
+  coefPrime.resize(deg + 1);
 
   for (int n = deg - 1; n > 0; n--)
   {
@@ -87,10 +80,7 @@ poly poly::diff()
   }
   coefPrime[0] = coef[1];
 
-  //std::cout << "Differentiated:\n";
-
   eqnPrime.fileSetCoef(deg - 1, coefPrime);
-  delete[] coefPrime;
 
   return eqnPrime;
 }
@@ -126,18 +116,17 @@ std::complex<double> poly::synDiv(const std::complex<double> divisor)
     this->coef[n] = newCoef[n];
   }
 
-  delete[] newCoef;
   return remainder;
 }
 
-bool poly::evalAtRoots(std::complex<double> *roots)
+bool poly::evalAtGiven(std::vector<std::complex<double>> &roots)
 {
   std::cout << "Evaluating polynomial at identified roots:\n";
   std::cout.precision(6);
 
   for (int n = 0; n < deg; n++)
   {
-    std::cout << "f" << std::fixed << roots[n] << " = " << std::scientific << evalPoly(roots[n]) << std::endl;
+    std::cout << "f" << std::fixed << roots[n] << " = " << std::scientific << real(evalPoly(roots[n])) << std::endl;
   }
 
   return true;

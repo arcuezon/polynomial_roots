@@ -5,17 +5,14 @@
 using namespace std;
 
 int readFile(string filename, poly &eqnRead);
-complex<double> startNewtons(poly eqnIn, poly prime, complex<double> estimate);
-complex<double> newtons(poly eqnIn, poly prime, complex<double> estimate, int iterations);
-bool findRoots(poly eqnIn, complex<double> *roots);
+complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations);
+bool findRoots(poly eqn, vector<complex<double>> &roots);
 
 int main(int argc, char **argv)
 {
   cout.precision(6);
   string filename; //Filename
-  complex<double> *roots;
-
-  complex<double> coefA[3] = {{4, 0}, {4, 0}, {1, 0}};
+  vector<complex<double>> roots;
 
   if (argc == 1) //No arguments
   {
@@ -35,82 +32,60 @@ int main(int argc, char **argv)
   }
 
   poly eqn;
-  poly test;
 
   int inDeg = readFile(filename, eqn); //Read polynomial from file
-  test = eqn;
   eqn.dispPoly();
-
-  //Allocate array for roots
-  roots = new complex<double>[inDeg];
-  for (int n = 0; n < inDeg; n++)
-  {
-    roots[n] = {0, 0};
-  }
 
   findRoots(eqn, roots);
-  eqn.dispPoly();
-  eqn.evalAtRoots(roots);
+  eqn.evalAtGiven(roots);
 
-  return 0;  test.fileSetCoef(2, coefA);
+  return 0;
 }
 
-bool findRoots(poly eqnIn, complex<double> *roots)
+bool findRoots(poly eqnIn, vector<complex<double>> &roots)
 {
-  int n = 0;
-
   while (!eqnIn.zero())
   {
-    roots[n] = startNewtons(eqnIn, eqnIn.diff(), {1, -1});
-    eqnIn.synDiv(roots[n]);
-    n++;
+    roots.push_back(newtons(eqnIn, eqnIn.diff(), {1, -1}, 0));
+    eqnIn.synDiv(roots.back());
   }
 
-  eqnIn.dispPoly();
-
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < roots.size(); i++)
   {
     cout << "Root " << i + 1 << " = " << fixed << roots[i] << endl;
   }
+  cout << endl;
 
   return true;
 }
 
-complex<double> startNewtons(poly eqnIn, poly prime, complex<double> estimate)
+complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations)
 {
-  complex<double> root = 0;
-  int iterations = 0;
-
-  root = newtons(eqnIn, prime, estimate, iterations);
-
-  return root;
-}
-
-complex<double> newtons(poly eqnIn, poly prime, complex<double> estimate, int iterations)
-{
-  if (eqnIn.evalPoly(estimate) == (complex<double>){0, 0})
+  if (eqn.evalPoly(estimate) == (complex<double>){0, 0})
   {
-    //cout << "[DEBUG] Evaluation zero reached.\n";
     return estimate;
   }
 
-  complex<double> x = estimate - (eqnIn.evalPoly(estimate) / prime.evalPoly(estimate));
+  complex<double> x = estimate - (eqn.evalPoly(estimate) / prime.evalPoly(estimate));
 
   if ((abs((x - estimate) / estimate)) < 10E-16)
   {
     return estimate;
   }
-  else if (iterations >= 200)
+  else if (iterations >= 2000)
+  {
+    cerr << "[ERROR] Max Iterations reached.\nStopped at" << x;
     exit(1);
+  }
 
   iterations++;
-  return newtons(eqnIn, prime, x, iterations);
+  return newtons(eqn, prime, x, iterations);
 }
 
 int readFile(string filename, poly &eqnRead)
 {
   int inDeg;
-  complex<double> *inCoef;
+  vector<complex<double>> inCoef;
   ifstream inFile;
 
   inFile.open(filename);
@@ -122,18 +97,15 @@ int readFile(string filename, poly &eqnRead)
   }
 
   inFile >> inDeg; //Read degree in file.
-
-  inCoef = new complex<double>[inDeg + 1]; //Allocate array of length inDeg.
   double temp;
 
   for (int n = 0; n <= inDeg; n++) //Read coefficients from file.
   {
     inFile >> temp;
-    inCoef[n] = temp;
+    inCoef.push_back(temp);
   }
 
   eqnRead.fileSetCoef(inDeg, inCoef); //Set coefficients
 
-  delete[] inCoef;
   return inDeg;
 }
