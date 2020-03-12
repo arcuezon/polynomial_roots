@@ -4,16 +4,16 @@
 
 using namespace std;
 
-int readFile(string filename, poly &eqn);
-long double startNewtons(poly eqn, poly prime, long double estimate);
-long double newtons(poly eqn, poly prime, long double estimate, int iterations);
-bool findRoots(poly eqn, long double **roots);
-void quadFormula(poly eqn, long double roots);
+int readFile(string filename, poly &eqnRead);
+complex<double> startNewtons(poly eqnIn, poly prime, complex<double> estimate);
+complex<double> newtons(poly eqnIn, poly prime, complex<double> estimate, int iterations);
+bool findRoots(poly eqnIn, complex<double> *roots);
 
 int main(int argc, char **argv)
 {
+  cout.precision(6);
   string filename; //Filename
-  long double **roots;
+  complex<double> *roots;
 
   if (argc == 1) //No arguments
   {
@@ -37,81 +37,75 @@ int main(int argc, char **argv)
   int inDeg = readFile(filename, eqn); //Read polynomial from file
   eqn.dispPoly();
 
-  //Allocate 2D array for roots
-  roots = new long double *[inDeg];
+  //Allocate array for roots
+  roots = new complex<double> [inDeg];
   for (int n = 0; n < inDeg; n++)
   {
-    roots[n] = new long double[2];
-  }
-  for (int n = 0; n < inDeg; n++)
-  {
-    roots[n][0] = 0;
-    roots[n][1] = 0;
+    roots[n] = {0, 0};
   }
 
-  /*cout << "Remainder = " << eqn.synDiv(-4) << endl;
-  eqn.dispPoly();*/
 
-  findRoots(eqn, roots);
+  findRoots(eqn, roots);  
+  eqn.evalAtRoots(roots);
 
   return 0;
 }
 
-bool findRoots(poly eqn, long double **roots)
+bool findRoots(poly eqnIn, complex<double> *roots)
 {
   int n = 0;
-  while (!eqn.quadDeg())
+  complex<double> estimate[3] = {{1, 0}, {1, 1}, {1, -1}};
+
+  while (!eqnIn.zero())
   {
-    roots[n][0] = startNewtons(eqn, eqn.diff(), 1);
-    eqn.synDiv(roots[n][0]);
+    roots[n] = startNewtons(eqnIn, eqnIn.diff(), estimate[2]);
+    eqnIn.synDiv(roots[n]);
     n++;
   }
 
   for (int i = 0; i < n; i++)
   {
-    cout << "Root " << i + 1 << " = " << roots[i][0] << endl;
+    cout << "Root " << i + 1 << " = " << fixed << roots[i] << endl;
   }
 
   return true;
 }
 
-long double startNewtons(poly eqn, poly prime, long double estimate)
+complex<double> startNewtons(poly eqnIn, poly prime, complex<double> estimate)
 {
-  double root = 0;
+  complex<double> root = 0;
   int iterations = 0;
 
-  root = newtons(eqn, prime, estimate, iterations);
+  root = newtons(eqnIn, prime, estimate, iterations);
 
   return root;
 }
 
-long double newtons(poly eqn, poly prime, long double estimate, int iterations)
+complex<double> newtons(poly eqnIn, poly prime, complex<double> estimate, int iterations)
 {
-  if (eqn.evalPoly(estimate) == 0)
+  if (eqnIn.evalPoly(estimate) == (complex<double>){0,0})
   {
     //cout << "[DEBUG] Evaluation zero reached.\n";
     return estimate;
   }
 
-  long double x = estimate - (eqn.evalPoly(estimate) / prime.evalPoly(estimate));
+  complex<double> x = estimate - (eqnIn.evalPoly(estimate) / prime.evalPoly(estimate));
 
   if ((abs((x - estimate) / estimate)) < 10E-16)
   {
-    //cout << "[DEBUG] Relative Error reached: " << abs((x - estimate) / estimate);
-    //cout << "\n[DEBUG]New: " << x << "\n[DEBUG]Old: " << estimate << endl;
     return estimate;
   }
   else if (iterations >= 200)
     exit(1);
 
   iterations++;
-  return newtons(eqn, prime, x, iterations);
+  return newtons(eqnIn, prime, x, iterations);
 }
 
-int readFile(string filename, poly &eqn)
+int readFile(string filename, poly &eqnRead)
 {
   int inDeg;
-  double *inCoef;
+  complex<double> *inCoef;
   ifstream inFile;
 
   inFile.open(filename);
@@ -124,7 +118,7 @@ int readFile(string filename, poly &eqn)
 
   inFile >> inDeg; //Read degree in file.
 
-  inCoef = new double[inDeg + 1]; //Allocate array of length inDeg.
+  inCoef = new complex<double>[inDeg + 1]; //Allocate array of length inDeg.
   double temp;
 
   for (int n = 0; n <= inDeg; n++) //Read coefficients from file.
@@ -133,7 +127,7 @@ int readFile(string filename, poly &eqn)
     inCoef[n] = temp;
   }
 
-  eqn.fileSetCoef(inDeg, inCoef); //Set coefficients
+  eqnRead.fileSetCoef(inDeg, inCoef); //Set coefficients
 
   delete[] inCoef;
   return inDeg;
