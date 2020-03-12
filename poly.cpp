@@ -127,7 +127,7 @@ std::complex<double> poly::synDiv(const std::complex<double> divisor)
 
   //Transfer new coefficients to existing array
   this->coef[deg] = 0; //Supposed leading = 0
-  deg--;         //Decrement degree
+  this->deg--;         //Decrement degree
   for (int n = deg; n >= 0; n--)
   {
     this->coef[n] = newCoef[n];

@@ -46,6 +46,7 @@ int main(int argc, char **argv)
 
 
   findRoots(eqn, roots);  
+  eqn.dispPoly();
   eqn.evalAtRoots(roots);
 
   return 0;
@@ -62,6 +63,9 @@ bool findRoots(poly eqnIn, complex<double> *roots)
     eqnIn.synDiv(roots[n]);
     n++;
   }
+
+  eqnIn.dispPoly();
+
 
   for (int i = 0; i < n; i++)
   {
