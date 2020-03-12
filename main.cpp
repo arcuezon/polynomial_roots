@@ -15,6 +15,8 @@ int main(int argc, char **argv)
   string filename; //Filename
   complex<double> *roots;
 
+  complex<double> coefA[3] = {{4, 0}, {4, 0}, {1, 0}};
+
   if (argc == 1) //No arguments
   {
     cout << "filename: ";
@@ -33,39 +35,38 @@ int main(int argc, char **argv)
   }
 
   poly eqn;
+  poly test;
 
   int inDeg = readFile(filename, eqn); //Read polynomial from file
+  test = eqn;
   eqn.dispPoly();
 
   //Allocate array for roots
-  roots = new complex<double> [inDeg];
+  roots = new complex<double>[inDeg];
   for (int n = 0; n < inDeg; n++)
   {
     roots[n] = {0, 0};
   }
 
-
-  findRoots(eqn, roots);  
+  findRoots(eqn, roots);
   eqn.dispPoly();
   eqn.evalAtRoots(roots);
 
-  return 0;
+  return 0;  test.fileSetCoef(2, coefA);
 }
 
 bool findRoots(poly eqnIn, complex<double> *roots)
 {
   int n = 0;
-  complex<double> estimate[3] = {{1, 0}, {1, 1}, {1, -1}};
 
   while (!eqnIn.zero())
   {
-    roots[n] = startNewtons(eqnIn, eqnIn.diff(), estimate[2]);
+    roots[n] = startNewtons(eqnIn, eqnIn.diff(), {1, -1});
     eqnIn.synDiv(roots[n]);
     n++;
   }
 
   eqnIn.dispPoly();
-
 
   for (int i = 0; i < n; i++)
   {
@@ -87,7 +88,7 @@ complex<double> startNewtons(poly eqnIn, poly prime, complex<double> estimate)
 
 complex<double> newtons(poly eqnIn, poly prime, complex<double> estimate, int iterations)
 {
-  if (eqnIn.evalPoly(estimate) == (complex<double>){0,0})
+  if (eqnIn.evalPoly(estimate) == (complex<double>){0, 0})
   {
     //cout << "[DEBUG] Evaluation zero reached.\n";
     return estimate;

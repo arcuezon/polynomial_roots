@@ -68,19 +68,12 @@ void poly::fileSetCoef(int inDeg, std::complex<double> inCoef[])
 {
   deg = inDeg;
 
-  coef = new std::complex<double>[deg + 1];
-  for (int i = 0; i <= deg; i++)
-  {
-    coef[i] = 0;
-  }
+  this->coef = new std::complex<double>[deg + 1];
 
   for (int i = 0; i <= deg; i++)
   {
     coef[i] = inCoef[i];
   }
-
-  //std::cout << "[DEBUG] Polynomial read from file.\n";
-  //dispPoly();
 }
 
 poly poly::diff()
