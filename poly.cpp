@@ -132,8 +132,7 @@ std::complex<double> poly::synDiv(const std::complex<double> divisor)
   {
     this->coef[n] = newCoef[n];
   }
-
-  delete[] newCoef;
+  
   return remainder;
 }
 
