@@ -4,7 +4,7 @@
         {
             "type": "shell",
             "label": "g++.exe build active file",
-            "command": "C:\\Program Files (x86)\\mingw-w64\\i686-8.1.0-posix-dwarf-rt_v6-rev0\\mingw32\\bin\\g++.exe",
+            "command": "C:\\Users\\Alfonso Cuezon\\Desktop\\polyRoots\\poly_roots\\main.cpp",
             "args": [
                 "-g",
                 "c:\\Users\\Alfonso\\Desktop\\CE30\\01 Roots\\main.cpp",
