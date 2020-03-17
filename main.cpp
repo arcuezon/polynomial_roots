@@ -1,6 +1,10 @@
 #include "poly.h"
-#include "poly.cpp"
+#include <iostream>
+#include <complex>
+#include <cmath>
+#include <vector>
 #include <fstream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -10,6 +14,7 @@ bool findRoots(poly eqn, vector<complex<double>> &roots);
 
 int main(int argc, char **argv)
 {
+  cout << "Hello\n";
   cout.precision(6);
   string filename; //Filename
   vector<complex<double>> roots;
@@ -47,6 +52,7 @@ bool findRoots(poly eqnIn, vector<complex<double>> &roots)
   while (!eqnIn.zero())
   {
     roots.push_back(newtons(eqnIn, eqnIn.diff(), {1, -1}, 0));
+    cout << "[DEBUG] Root found.\n";
     eqnIn.synDiv(roots.back());
   }
 
@@ -72,10 +78,11 @@ complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iter
   {
     return estimate;
   }
-  else if (iterations >= 2000)
+  else if (iterations >= 500)
   {
-    cerr << "[ERROR] Max Iterations reached.\nStopped at" << x;
-    exit(1);
+    cerr << "[ERROR] Max Iterations reached.\nStopped at" << estimate << endl;
+    //exit(1);
+    return estimate;
   }
 
   iterations++;

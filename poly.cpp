@@ -1,8 +1,14 @@
 #include "poly.h"
 #include <iostream>
+#include <complex>
+#include <cmath>
+#include <vector>
+#include <fstream>
+#include <cstdlib>
 
 poly::poly()
 {
+  deg = 0;
 }
 
 poly::poly(int inDeg)
@@ -92,7 +98,7 @@ bool poly::zero()
 
 std::complex<double> poly::synDiv(const std::complex<double> divisor)
 {
-  std::complex<double> newCoef[deg + 1] = {0};
+  std::complex<double> newCoef[deg + 1];
   newCoef[deg - 1] = coef[deg];
   std::complex<double> remainder = 0;
 

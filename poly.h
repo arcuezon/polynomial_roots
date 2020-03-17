@@ -1,14 +1,17 @@
 #ifndef POLY_H
 #define POLY_H
 
+#include <iostream>
 #include <complex>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <cstdlib>
 
 class poly
 {
 private:
-  unsigned short int deg = 0;
+  unsigned short int deg;
   std::vector<std::complex<double>> coef;
 
 public:
