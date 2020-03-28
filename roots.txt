@@ -1,0 +1,2 @@
+Polynomial from "files\p1.txt"
+(-1,-1.94678e-25) (4,5.5634e-26) (-3,0) 

@@ -7,6 +7,7 @@
 #include <vector>
 #include <fstream>
 #include <cstdlib>
+#include <iomanip>
 
 class poly
 {
