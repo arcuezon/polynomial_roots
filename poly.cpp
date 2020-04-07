@@ -138,3 +138,12 @@ bool poly::evalAtGiven(std::vector<std::complex<double>> &roots)
 
   return true;
 }
+
+void poly::coef2File(std::ofstream &out)
+{
+  for (auto i : coef)
+  {
+    out << i << " ";
+  }
+  out << std::endl;
+}

@@ -27,6 +27,7 @@ public:
   bool zero();
   std::complex<double> synDiv(const std::complex<double> divisor);
   bool evalAtGiven(std::vector<std::complex<double>> &roots);
+  void coef2File(std::ofstream &out);
 };
 
 #endif

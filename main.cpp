@@ -12,7 +12,7 @@ using namespace std;
 void readFile(string filename, poly &eqnRead);                                           //Function to read from file
 complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations); //Newton's Method function
 bool findRoots(poly eqn, vector<complex<double>> &roots);                                //Finding all roots using Newton's and Synthetic Division
-void saveFile(string filename, vector<complex<double>> roots);
+void saveFile(string filename, poly eqn, vector<complex<double>> roots);
 
 int main(int argc, char **argv)
 {
@@ -47,7 +47,16 @@ int main(int argc, char **argv)
   findRoots(eqn, roots);
   eqn.evalAtGiven(roots); //Evaluate the polynomial at roots identified
 
-  saveFile(filename, roots);
+  cout << "Would you like to save roots to file? (Y/N) ";
+  char save;
+  cin >> save;
+  if (save == 'Y' || save == 'y')
+  {
+    cout << "Saving to \"./roots.txt\"";
+    saveFile(filename, eqn, roots);
+  }
+  else
+    cout << "Exiting.";
 
   return 0;
 }
@@ -120,14 +129,18 @@ void readFile(string filename, poly &eqnRead) //Reading from txt file
   eqnRead.fileSetCoef(inDeg, inCoef); //Set coefficients
 }
 
-void saveFile(string filename, vector<complex<double>> roots)
+void saveFile(string filename, poly eqn, vector<complex<double>> roots)
 {
-  //string saveName = filename + " roots.txt";
   ofstream outFile("roots.txt");
 
-  outFile << "Polynomial from \"" << filename << "\"" << endl;
+  outFile << "Polynomial from \"" << filename << "\" x0 to xn:" << endl;
 
-  for(auto i: roots)
+  eqn.coef2File(outFile);
+
+  outFile << endl;
+  outFile << roots.size() << " computed roots:\n";
+
+  for (auto i : roots)
   {
     outFile << setprecision(10) << i << " ";
   }
