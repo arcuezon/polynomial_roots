@@ -1,9 +1,15 @@
 #include "poly.h"
 #include <iostream>
 #include <complex>
+#include <cmath>
+#include <vector>
+#include <fstream>
+#include <cstdlib>
+#include <iomanip>
 
 poly::poly()
 {
+  deg = 0;
 }
 
 poly::poly(int inDeg)
@@ -23,13 +29,6 @@ void poly::setCoef()
     std::cin >> deg;
   }
 
-  coef = new double[deg + 1];
-
-  for (int n = 0; n <= deg; n++)
-  {
-    coef[n] = 0;
-  }
-
   double coefIn = 0;
 
   for (int n = 0; n <= deg; n++)
@@ -37,7 +36,7 @@ void poly::setCoef()
     std::cout << "Coefficient for degree " << n << ": ";
     std::cin >> coefIn;
 
-    coef[n] = coefIn;
+    coef.push_back(coefIn);
   }
 }
 
@@ -45,17 +44,18 @@ void poly::dispPoly()
 {
   std::cout << "Degree = " << deg << std::endl;
 
-  for (int n = deg; n > 0; n--)
+  for (int n = deg; n >= 0; n--)
   {
-    std::cout << coef[n] << "x^" << n << " + ";
+    std::cout << real(coef[n]) << "x^" << n << std::endl;
   }
 
-  std::cout << coef[0] << std::endl;
+  std::cout << std::endl;
+  //std::cout << real(coef[0]) << std::endl;
 }
 
-long double poly::evalPoly(long double x)
+std::complex<double> poly::evalPoly(std::complex<double> x)
 {
-  double sum = 0;
+  std::complex<double> sum = {0, 0};
   for (int n = deg; n >= 0; n--)
   {
     sum = sum * x + coef[n];
@@ -64,54 +64,44 @@ long double poly::evalPoly(long double x)
   return sum;
 }
 
-void poly::fileSetCoef(int inDeg, double inCoef[])
+void poly::fileSetCoef(int inDeg, std::vector<std::complex<double>> inCoef)
 {
   deg = inDeg;
 
-  coef = new double[deg + 1];
   for (int i = 0; i <= deg; i++)
   {
-    coef[i] = 0;
+    coef.push_back(inCoef[i]);
   }
-
-  for (int i = 0; i <= deg; i++)
-  {
-    coef[i] = inCoef[i];
-  }
-
-  //std::cout << "[DEBUG] Polynomial read from file.\n";
-  //dispPoly();
 }
 
 poly poly::diff()
 {
   poly eqnPrime;
-  double *coefPrime = new double[deg];
+  std::vector<std::complex<double>> coefPrime;
+
+  coefPrime.resize(deg + 1);
 
   for (int n = deg - 1; n > 0; n--)
   {
-    coefPrime[n] = coef[n + 1] * (n + 1);
+    coefPrime[n] = coef[n + 1] * (double)(n + 1);
   }
   coefPrime[0] = coef[1];
 
-  //std::cout << "Differentiated:\n";
-
   eqnPrime.fileSetCoef(deg - 1, coefPrime);
-  delete[] coefPrime;
 
   return eqnPrime;
 }
 
-bool poly::quadDeg()
+bool poly::zero()
 {
   return (deg == 0);
 }
 
-double poly::synDiv(const double divisor)
+std::complex<double> poly::synDiv(const std::complex<double> divisor)
 {
-  double newCoef[deg + 1] = {0};
+  std::complex<double> newCoef[deg + 1];
   newCoef[deg - 1] = coef[deg];
-  double remainder = 0;
+  std::complex<double> remainder = 0;
 
   for (int n = deg - 2; n >= -1; n--) //-2 since new eqn is 1 degree lower and the first coef is already set
   {
@@ -126,12 +116,34 @@ double poly::synDiv(const double divisor)
   }
 
   //Transfer new coefficients to existing array
-  coef[deg] = 0; //Supposed leading = 0
-  deg--;         //Decrement degree
+  this->coef[deg] = 0; //Supposed leading = 0
+  this->deg--;         //Decrement degree
   for (int n = deg; n >= 0; n--)
   {
-    coef[n] = newCoef[n];
+    this->coef[n] = newCoef[n];
   }
 
   return remainder;
+}
+
+bool poly::evalAtGiven(std::vector<std::complex<double>> &roots)
+{
+  std::cout << "Evaluating polynomial at identified roots:\n";
+  std::cout.precision(6);
+
+  for (int n = 0; n < deg; n++)
+  {
+    std::cout << "f" << std::fixed << roots[n] << " = " << std::scientific << real(evalPoly(roots[n])) << std::endl;
+  }
+
+  return true;
+}
+
+void poly::coef2File(std::ofstream &out)
+{
+  for (auto i : coef)
+  {
+    out << i << " ";
+  }
+  out << std::endl;
 }

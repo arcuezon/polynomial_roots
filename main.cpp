@@ -1,20 +1,26 @@
 #include "poly.h"
-#include "poly.cpp"
+#include <iostream>
+#include <complex>
+#include <cmath>
+#include <vector>
 #include <fstream>
+#include <cstdlib>
+#include <iomanip>
 
 using namespace std;
 
-int readFile(string filename, poly &eqn);
-long double startNewtons(poly eqn, poly prime, long double estimate);
-long double newtons(poly eqn, poly prime, long double estimate, int iterations);
-bool findRoots(poly eqn, long double **roots);
-void quadFormula(poly eqn, long double roots);
+void readFile(string filename, poly &eqnRead);                                           //Function to read from file
+complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations); //Newton's Method function
+bool findRoots(poly eqn, vector<complex<double>> &roots);                                //Finding all roots using Newton's and Synthetic Division
+void saveFile(string filename, poly eqn, vector<complex<double>> roots);
 
 int main(int argc, char **argv)
 {
-  string filename; //Filename
-  long double **roots;
+  cout.precision(6);
+  string filename;               //Filename
+  vector<complex<double>> roots; //Vector for roots
 
+  //Arguments checking
   if (argc == 1) //No arguments
   {
     cout << "filename: ";
@@ -32,86 +38,75 @@ int main(int argc, char **argv)
     exit(1);
   }
 
+  //Poly object for the equation
   poly eqn;
 
-  int inDeg = readFile(filename, eqn); //Read polynomial from file
-  eqn.dispPoly();
-
-  //Allocate 2D array for roots
-  roots = new long double *[inDeg];
-  for (int n = 0; n < inDeg; n++)
-  {
-    roots[n] = new long double[2];
-  }
-  for (int n = 0; n < inDeg; n++)
-  {
-    roots[n][0] = 0;
-    roots[n][1] = 0;
-  }
-
-  /*cout << "Remainder = " << eqn.synDiv(-4) << endl;
-  eqn.dispPoly();*/
+  readFile(filename, eqn); //Read polynomial from file
+  eqn.dispPoly();          //Display the polynomial read
 
   findRoots(eqn, roots);
+  eqn.evalAtGiven(roots); //Evaluate the polynomial at roots identified
+
+  cout << "Would you like to save roots to file? (Y/N) ";
+  char save;
+  cin >> save;
+  if (save == 'Y' || save == 'y')
+  {
+    cout << "Saving to \"./roots.txt\"";
+    saveFile(filename, eqn, roots);
+  }
+  else
+    cout << "Exiting.";
 
   return 0;
 }
 
-bool findRoots(poly eqn, long double **roots)
+bool findRoots(poly eqnIn, vector<complex<double>> &roots)
 {
-  int n = 0;
-  while (!eqn.quadDeg())
+  while (!eqnIn.zero()) //While polynomial is not of degree 0
   {
-    roots[n][0] = startNewtons(eqn, eqn.diff(), 1);
-    eqn.synDiv(roots[n][0]);
-    n++;
+    roots.push_back(newtons(eqnIn, eqnIn.diff(), {1, -1}, 0)); //Find one root and push to root vector
+    cout << "[DEBUG] Root found.\n";
+    eqnIn.synDiv(roots.back()); //Divide by root solved
   }
 
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < roots.size(); i++)
   {
-    cout << "Root " << i + 1 << " = " << roots[i][0] << endl;
+    cout << "Root " << i + 1 << " = " << fixed << roots[i] << endl;
   }
+  cout << endl;
 
   return true;
 }
 
-long double startNewtons(poly eqn, poly prime, long double estimate)
+complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations) //Newton's Method recursive
 {
-  double root = 0;
-  int iterations = 0;
-
-  root = newtons(eqn, prime, estimate, iterations);
-
-  return root;
-}
-
-long double newtons(poly eqn, poly prime, long double estimate, int iterations)
-{
-  if (eqn.evalPoly(estimate) == 0)
+  if (eqn.evalPoly(estimate) == (complex<double>){0, 0}) //If evaluated to 0
   {
-    //cout << "[DEBUG] Evaluation zero reached.\n";
     return estimate;
   }
 
-  long double x = estimate - (eqn.evalPoly(estimate) / prime.evalPoly(estimate));
+  complex<double> x = estimate - (eqn.evalPoly(estimate) / prime.evalPoly(estimate)); //Solve for next estimate
 
-  if ((abs((x - estimate) / estimate)) < 10E-16)
+  if ((abs((x - estimate) / estimate)) < 10E-16) //Relative error
   {
-    //cout << "[DEBUG] Relative Error reached: " << abs((x - estimate) / estimate);
-    //cout << "\n[DEBUG]New: " << x << "\n[DEBUG]Old: " << estimate << endl;
     return estimate;
   }
-  else if (iterations >= 200)
-    exit(1);
+  else if (iterations >= 500) //Max iterations reached
+  {
+    cerr << "[ERROR] Max Iterations reached.\nStopped at" << estimate << endl;
+    //exit(1);
+    return estimate;
+  }
 
   iterations++;
-  return newtons(eqn, prime, x, iterations);
+  return newtons(eqn, prime, x, iterations); //Call recursive
 }
 
-int readFile(string filename, poly &eqn)
+void readFile(string filename, poly &eqnRead) //Reading from txt file
 {
   int inDeg;
-  double *inCoef;
+  vector<complex<double>> inCoef;
   ifstream inFile;
 
   inFile.open(filename);
@@ -123,18 +118,32 @@ int readFile(string filename, poly &eqn)
   }
 
   inFile >> inDeg; //Read degree in file.
-
-  inCoef = new double[inDeg + 1]; //Allocate array of length inDeg.
   double temp;
 
   for (int n = 0; n <= inDeg; n++) //Read coefficients from file.
   {
     inFile >> temp;
-    inCoef[n] = temp;
+    inCoef.push_back(temp);
   }
 
-  eqn.fileSetCoef(inDeg, inCoef); //Set coefficients
+  eqnRead.fileSetCoef(inDeg, inCoef); //Set coefficients
+}
 
-  delete[] inCoef;
-  return inDeg;
+void saveFile(string filename, poly eqn, vector<complex<double>> roots)
+{
+  ofstream outFile("roots.txt");
+
+  outFile << "Polynomial from \"" << filename << "\" x0 to xn:" << endl;
+
+  eqn.coef2File(outFile);
+
+  outFile << endl;
+  outFile << roots.size() << " computed roots:\n";
+
+  for (auto i : roots)
+  {
+    outFile << setprecision(10) << i << " ";
+  }
+
+  outFile.close();
 }
