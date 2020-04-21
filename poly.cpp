@@ -21,26 +21,26 @@ poly::~poly()
 {
 }
 
-void poly::setCoef()
+void poly::setCoef() //Set degree through iostream
 {
-  if (deg == 0)
+  if (deg == 0) //In case degree was not set.
   {
     std::cout << "Enter degree of polynomial: ";
     std::cin >> deg;
   }
 
-  double coefIn = 0;
+  double coefIn = 0; //Temp input variable
 
   for (int n = 0; n <= deg; n++)
   {
     std::cout << "Coefficient for degree " << n << ": ";
     std::cin >> coefIn;
 
-    coef.push_back(coefIn);
+    coef.push_back(coefIn); //Push input to coefficient vector
   }
 }
 
-void poly::dispPoly()
+void poly::dispPoly() //Display to terminal
 {
   std::cout << "Degree = " << deg << std::endl;
 
@@ -50,36 +50,35 @@ void poly::dispPoly()
   }
 
   std::cout << std::endl;
-  //std::cout << real(coef[0]) << std::endl;
 }
 
 std::complex<double> poly::evalPoly(std::complex<double> x)
 {
-  std::complex<double> sum = {0, 0};
-  for (int n = deg; n >= 0; n--)
+  std::complex<double> eval = {0, 0}; //Variable to hold the evaluation
+  for (int n = deg; n >= 0; n--) //Horner's method to evaluate a polynomial
   {
-    sum = sum * x + coef[n];
+    eval = eval * x + coef[n];
   }
 
-  return sum;
+  return eval;
 }
 
-void poly::fileSetCoef(int inDeg, std::vector<std::complex<double>> inCoef)
+void poly::fileSetCoef(int inDeg, std::vector<std::complex<double>> inCoef) //Set coef from a vector
 {
-  deg = inDeg;
+  deg = inDeg; //Set degree
 
-  for (int i = 0; i <= deg; i++)
+  for (int i = 0; i <= deg; i++) //Set coefs
   {
     coef.push_back(inCoef[i]);
   }
 }
 
-poly poly::diff()
+poly poly::diff() //Differentiate
 {
-  poly eqnPrime;
-  std::vector<std::complex<double>> coefPrime;
+  poly eqnPrime; //poly object to save the derivative
+  std::vector<std::complex<double>> coefPrime; //temp vector to save the new coefs
 
-  coefPrime.resize(deg + 1);
+  coefPrime.resize(deg + 1); //Set size of vector
 
   for (int n = deg - 1; n > 0; n--)
   {
@@ -92,15 +91,15 @@ poly poly::diff()
   return eqnPrime;
 }
 
-bool poly::zero()
+bool poly::zero() //Check if degree is 0
 {
   return (deg == 0);
 }
 
-std::complex<double> poly::synDiv(const std::complex<double> divisor)
+std::complex<double> poly::synDiv(const std::complex<double> divisor) //Synthetic division
 {
   std::complex<double> newCoef[deg + 1];
-  newCoef[deg - 1] = coef[deg];
+  newCoef[deg - 1] = coef[deg]; //Leading coefficient is the same
   std::complex<double> remainder = 0;
 
   for (int n = deg - 2; n >= -1; n--) //-2 since new eqn is 1 degree lower and the first coef is already set
@@ -126,7 +125,7 @@ std::complex<double> poly::synDiv(const std::complex<double> divisor)
   return remainder;
 }
 
-bool poly::evalAtGiven(std::vector<std::complex<double>> &roots)
+bool poly::evalAtGiven(std::vector<std::complex<double>> &roots) //Evaluate and output to terminal
 {
   std::cout << "Evaluating polynomial at identified roots:\n";
   std::cout.precision(6);
@@ -141,6 +140,8 @@ bool poly::evalAtGiven(std::vector<std::complex<double>> &roots)
 
 void poly::coef2File(std::ofstream &out)
 {
+  out << deg << ":\n";
+  
   for (auto i : coef)
   {
     out << i << " ";

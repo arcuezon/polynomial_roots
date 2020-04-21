@@ -38,15 +38,16 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  //Poly object for the equation
+  //Poly object for the equation to be solved
   poly eqn;
 
   readFile(filename, eqn); //Read polynomial from file
   eqn.dispPoly();          //Display the polynomial read
 
-  findRoots(eqn, roots);
+  findRoots(eqn, roots); //Solve for the roots
   eqn.evalAtGiven(roots); //Evaluate the polynomial at roots identified
 
+  //User option to save roots to txt file
   cout << "Would you like to save roots to file? (Y/N) ";
   char save;
   cin >> save;
@@ -61,7 +62,7 @@ int main(int argc, char **argv)
   return 0;
 }
 
-bool findRoots(poly eqnIn, vector<complex<double>> &roots)
+bool findRoots(poly eqnIn, vector<complex<double>> &roots) //Starter function to solve roots
 {
   while (!eqnIn.zero()) //While polynomial is not of degree 0
   {
@@ -79,20 +80,20 @@ bool findRoots(poly eqnIn, vector<complex<double>> &roots)
   return true;
 }
 
-complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations) //Newton's Method recursive
+complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations) //Recursive Newton's Method
 {
-  if (eqn.evalPoly(estimate) == (complex<double>){0, 0}) //If evaluated to 0
+  if (eqn.evalPoly(estimate) == (complex<double>){0, 0}) //If eqn is evaluated to 0 @root currently being solved
+  {
+    return estimate; 
+  }
+
+  complex<double> x = estimate - (eqn.evalPoly(estimate) / prime.evalPoly(estimate)); //Continue and solve for next estimate (Formula)
+
+  if ((abs((x - estimate) / estimate)) < 10E-16) //Relative error checking
   {
     return estimate;
   }
-
-  complex<double> x = estimate - (eqn.evalPoly(estimate) / prime.evalPoly(estimate)); //Solve for next estimate
-
-  if ((abs((x - estimate) / estimate)) < 10E-16) //Relative error
-  {
-    return estimate;
-  }
-  else if (iterations >= 500) //Max iterations reached
+  else if (iterations >= 500) //In case max iterations is reached and root is not solved
   {
     cerr << "[ERROR] Max Iterations reached.\nStopped at" << estimate << endl;
     //exit(1);
@@ -133,7 +134,7 @@ void saveFile(string filename, poly eqn, vector<complex<double>> roots)
 {
   ofstream outFile("roots.txt");
 
-  outFile << "Polynomial from \"" << filename << "\" x0 to xn:" << endl;
+  outFile << "Polynomial from \"" << filename << "\" x0 to x";
 
   eqn.coef2File(outFile);
 
