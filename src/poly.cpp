@@ -55,7 +55,7 @@ void poly::dispPoly() //Display to terminal
 std::complex<double> poly::evalPoly(std::complex<double> x)
 {
   std::complex<double> eval = {0, 0}; //Variable to hold the evaluation
-  for (int n = deg; n >= 0; n--) //Horner's method to evaluate a polynomial
+  for (int n = deg; n >= 0; n--)      //Horner's method to evaluate a polynomial
   {
     eval = eval * x + coef[n];
   }
@@ -75,7 +75,7 @@ void poly::fileSetCoef(int inDeg, std::vector<std::complex<double>> inCoef) //Se
 
 poly poly::diff() //Differentiate
 {
-  poly eqnPrime; //poly object to save the derivative
+  poly eqnPrime;                               //poly object to save the derivative
   std::vector<std::complex<double>> coefPrime; //temp vector to save the new coefs
 
   coefPrime.resize(deg + 1); //Set size of vector
@@ -98,7 +98,14 @@ bool poly::zero() //Check if degree is 0
 
 std::complex<double> poly::synDiv(const std::complex<double> divisor) //Synthetic division
 {
-  std::complex<double> newCoef[deg + 1];
+  std::complex<double> *newCoef;
+  newCoef = new std::complex<double>[deg + 1];
+  if (newCoef == nullptr)
+  {
+    std::cerr << "Allocation fail.";
+    exit(1);
+  }
+  //std::complex<double> newCoef[deg + 1];
   newCoef[deg - 1] = coef[deg]; //Leading coefficient is the same
   std::complex<double> remainder = 0;
 
@@ -122,6 +129,7 @@ std::complex<double> poly::synDiv(const std::complex<double> divisor) //Syntheti
     this->coef[n] = newCoef[n];
   }
 
+  delete newCoef;
   return remainder;
 }
 
@@ -141,7 +149,7 @@ bool poly::evalAtGiven(std::vector<std::complex<double>> &roots) //Evaluate and 
 void poly::coef2File(std::ofstream &out)
 {
   out << deg << ":\n";
-  
+
   for (auto i : coef)
   {
     out << i << " ";

@@ -82,7 +82,8 @@ bool findRoots(poly eqnIn, vector<complex<double>> &roots) //Starter function to
 
 complex<double> newtons(poly eqn, poly prime, complex<double> estimate, int iterations) //Recursive Newton's Method
 {
-  if (eqn.evalPoly(estimate) == (complex<double>){0, 0}) //If eqn is evaluated to 0 @root currently being solved
+  complex<double> zero = {0, 0};
+  if (eqn.evalPoly(estimate) == zero) //If eqn is evaluated to 0 @root currently being solved
   {
     return estimate; 
   }
